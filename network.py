@@ -24,7 +24,7 @@ class Network():
         for k in range(n,mini_batch_size)]
 
         for mini_batch in mini_batches:
-            self.updated_mini_batch(mini_batch,eta)
+            self.updated_mini_batch(mini_batch,eta,n)
         if test_data:
             print("Epoch {0}: {1} / {2}".format(x, self.evaluate(test_data), n_test))
 
