@@ -47,15 +47,15 @@ class Network():
         return a
 
     def SGD(self,training_data,epochs,mini_batch_size,eta,lmbda=0.0,evaluation_data=None,
-            monitor_evaluation_cost=False,
             monitor_evaluation_accuracy=False,
-            monitor_training_cost=False,
-            monitor_training_accuracy=False
+            monitor_training_accuracy=False,
+            monitor_training_loss=False,
+            monitor_evaluation_loss=False
             ):
         n = len(training_data)
 
-        evaluation_cost,evaluation_accuracy=[],[]
-        training_cost,training_accuracy=[],[]
+        training_accuracy,evaluation_accuracy=[],[]
+        training_loss,evaluation_loss=[],[]
 
         for x in range(epochs):
             np.random.shuffle(training_data)
@@ -65,22 +65,25 @@ class Network():
             for mini_batch in mini_batchs:
                 self.update_mini_batch(mini_batch,eta,lmbda,n)
 
-            if monitor_training_cost:
-                cost=self.total_cost(training_data,lmbda)
-                training_cost.append(cost)
+            print(f"Epoch {x+1}")
+            if monitor_training_loss:
+                loss=self.total_cost(training_data,lmbda,convert=False)
+                training_loss.append(loss)
+                print(f"Training loss: {loss}")
             if monitor_training_accuracy:
-                accuracy=self.accuracy(training_data,convert=True)
+                accuracy=self.accuracy(training_data,convert=True)/len(training_data)
                 training_accuracy.append(accuracy)
-            if monitor_evaluation_cost:
-                cost=self.total_cost(evaluation_data,lmbda,convert=True)
-                evaluation_cost.append(cost)
+                print(f"Training accuracy: {accuracy}")
+            if monitor_evaluation_loss:
+                loss=self.total_cost(evaluation_data,lmbda,convert=True)
+                evaluation_loss.append(loss)
+                print(f"Evaluation loss: {loss}")
             if monitor_evaluation_accuracy:
-                accuracy=self.accuracy(evaluation_data,convert=False)
+                accuracy=self.accuracy(evaluation_data,convert=False)/len(evaluation_data)
                 evaluation_accuracy.append(accuracy)
-                print(f"Epoch {x+1}: Test Accuracy = {accuracy}/{len(evaluation_data)}")
-
-        return evaluation_cost, evaluation_accuracy,training_cost, training_accuracy
-
+                print(f"Evaluation accuracy: {accuracy}")
+        return training_accuracy,evaluation_accuracy, training_loss, evaluation_loss
+    
     def update_mini_batch(self,mini_batch,eta,lmbda,n):
         nabla_b=[np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
@@ -142,8 +145,8 @@ class Network():
             cost+=self.cost.fn(a,y)/len(data)
         cost+=0.5*(lmbda/len(data))*sum(np.linalg.norm(w)**2 for w in self.weights)
         return cost
-
-
+    
+ 
 
 
 
